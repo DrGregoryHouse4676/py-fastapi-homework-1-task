@@ -1,31 +1,27 @@
 from datetime import date
-from typing import List, Optional
-
+from typing import List
 from pydantic import BaseModel, ConfigDict
 
 
 class MovieDetailResponseSchema(BaseModel):
     id: int
-    name: str
-    date: date
-    score: float
-    genre: str
-    overview: str
-    crew: str
+    title: str
     orig_title: str
     status: str
     orig_lang: str
-    budget: float
-    revenue: float
+    budget: int
+    revenue: int
     country: str
+    date: date
+    score: float
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class MovieListResponseSchema(BaseModel):
     movies: List[MovieDetailResponseSchema]
-    prev_page: Optional[str]
-    next_page: Optional[str]
+    prev_page: str
+    next_page: str
     total_pages: int
     total_items: int
 

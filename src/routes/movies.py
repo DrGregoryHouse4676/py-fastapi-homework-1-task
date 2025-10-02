@@ -1,6 +1,4 @@
 from math import ceil
-from typing import Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,14 +9,14 @@ from src.schemas.movies import MovieDetailResponseSchema, MovieListResponseSchem
 router = APIRouter(prefix="/movies")
 
 
-@router.get("/", response_model=MovieListResponseSchema)
+@router.get("/", response_model=MovieListResponseSchema, name="get_movies")
 async def get_movies(
     request: Request,
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1, le=20),
     db: AsyncSession = Depends(get_db),
 ) -> MovieListResponseSchema:
-    total_items: int = await db.scalar(select(func.count()).select_from(MovieModel)) or 0
+    total_items: int = await db.scalar(select(func.count(MovieModel.id))) or 0
 
     if total_items == 0:
         raise HTTPException(status_code=404, detail="No movies found.")
@@ -37,16 +35,13 @@ async def get_movies(
     )
     movies = movies_result.scalars().all()
 
-    prev_page: Optional[str] = None
-    next_page: Optional[str] = None
+    base_path = request.url_for("get_movies").path
 
-    if page > 1:
-        prev_page = str(request.url.include_query_params(page=page - 1, per_page=per_page))
-    if page < total_pages:
-        next_page = str(request.url.include_query_params(page=page + 1, per_page=per_page))
+    prev_page = f"{base_path}?page={max(1, page - 1)}&per_page={per_page}"
+    next_page = f"{base_path}?page={min(total_pages, page + 1)}&per_page={per_page}"
 
     return MovieListResponseSchema(
-        movies=movies,
+        movies=[MovieDetailResponseSchema.model_validate(m) for m in movies],
         prev_page=prev_page,
         next_page=next_page,
         total_pages=total_pages,
