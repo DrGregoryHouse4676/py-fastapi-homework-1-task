@@ -1,7 +1,7 @@
 from math import ceil
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +13,7 @@ router = APIRouter(prefix="/movies")
 
 @router.get("/", response_model=MovieListResponseSchema)
 async def get_movies(
+    request: Request,
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1, le=20),
     db: AsyncSession = Depends(get_db),
@@ -36,15 +37,13 @@ async def get_movies(
     )
     movies = movies_result.scalars().all()
 
-    base_path = "/theater/movies/"
     prev_page: Optional[str] = None
     next_page: Optional[str] = None
 
     if page > 1:
-        prev_page = f"{base_path}?page={page - 1}&per_page={per_page}"
-
+        prev_page = str(request.url.include_query_params(page=page - 1, per_page=per_page))
     if page < total_pages:
-        next_page = f"{base_path}?page={page + 1}&per_page={per_page}"
+        next_page = str(request.url.include_query_params(page=page + 1, per_page=per_page))
 
     return MovieListResponseSchema(
         movies=movies,
