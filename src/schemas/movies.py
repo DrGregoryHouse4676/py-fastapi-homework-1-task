@@ -1,11 +1,14 @@
 from datetime import date
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 
 
 class MovieDetailResponseSchema(BaseModel):
     id: int
-    title: str
+    name: str
+    genre: str
+    overview: str
+    crew: str
     orig_title: str
     status: str
     orig_lang: str
@@ -20,8 +23,8 @@ class MovieDetailResponseSchema(BaseModel):
 
 class MovieListResponseSchema(BaseModel):
     movies: List[MovieDetailResponseSchema]
-    prev_page: str
-    next_page: str
+    prev_page: Optional[str]
+    next_page: Optional[str]
     total_pages: int
     total_items: int
 

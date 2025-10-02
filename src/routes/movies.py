@@ -37,11 +37,20 @@ async def get_movies(
 
     base_path = request.url_for("get_movies").path
 
-    prev_page = f"{base_path}?page={max(1, page - 1)}&per_page={per_page}"
-    next_page = f"{base_path}?page={min(total_pages, page + 1)}&per_page={per_page}"
+    prev_page = f"{base_path}?page={page - 1}&per_page={per_page}" if page > 1 else None
+    next_page = f"{base_path}?page={page + 1}&per_page={per_page}" if page < total_pages else None
+
+    movies_serialized = [
+        MovieDetailResponseSchema.model_validate({
+            **m.__dict__,
+            "budget": int(m.budget) if m.budget is not None else 0,
+            "revenue": int(m.revenue) if m.revenue is not None else 0
+        })
+        for m in movies
+    ]
 
     return MovieListResponseSchema(
-        movies=[MovieDetailResponseSchema.model_validate(m) for m in movies],
+        movies=movies_serialized,
         prev_page=prev_page,
         next_page=next_page,
         total_pages=total_pages,
@@ -62,4 +71,8 @@ async def get_movie_by_id(
             detail="Movie with the given ID was not found."
         )
 
-    return MovieDetailResponseSchema.model_validate(movie)
+    return MovieDetailResponseSchema.model_validate({
+        **movie.__dict__,
+        "budget": int(movie.budget) if movie.budget is not None else 0,
+        "revenue": int(movie.revenue) if movie.revenue is not None else 0
+    })
