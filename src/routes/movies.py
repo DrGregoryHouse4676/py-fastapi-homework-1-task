@@ -43,8 +43,8 @@ async def get_movies(
     movies_serialized = [
         MovieDetailResponseSchema.model_validate({
             **m.__dict__,
-            "budget": int(m.budget) if m.budget is not None else 0,
-            "revenue": int(m.revenue) if m.revenue is not None else 0
+            "budget": float(m.budget) if m.budget is not None else 0.0,
+            "revenue": float(m.revenue) if m.revenue is not None else 0.0
         })
         for m in movies
     ]
@@ -73,6 +73,6 @@ async def get_movie_by_id(
 
     return MovieDetailResponseSchema.model_validate({
         **movie.__dict__,
-        "budget": int(movie.budget) if movie.budget is not None else 0,
-        "revenue": int(movie.revenue) if movie.revenue is not None else 0
+        "budget": float(movie.budget) if movie.budget is not None else 0.0,
+        "revenue": float(movie.revenue) if movie.revenue is not None else 0.0
     })

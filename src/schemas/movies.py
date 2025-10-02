@@ -12,8 +12,8 @@ class MovieDetailResponseSchema(BaseModel):
     orig_title: str
     status: str
     orig_lang: str
-    budget: int
-    revenue: int
+    budget: float
+    revenue: float
     country: str
     date: date
     score: float
